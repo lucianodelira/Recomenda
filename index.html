@@ -6,14 +6,9 @@
   <title>Bolão</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; }
-    #pix-key { display: none; cursor: pointer; background-color: #f0f0f0; padding: 5px; border: 1px solid #ccc; border-radius: 5px; font-size: 12px; width: 200px; margin: 10px auto; }
+    #pix-key { display: none; cursor: pointer; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
     #confirmation { display: none; color: green; }
     #qrcode { margin-top: 20px; }
-    #bolao-info { display: none; }
-    .milhar-col { display: inline-block; margin: 10px; }
-    #check-button { display: none; }
-    .button { background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-    .button:hover { background-color: #218838; }
   </style>
 </head>
 <body>
@@ -25,22 +20,11 @@
   <input type="text" id="phone" placeholder="Telefone"><br><br>
   <input type="text" id="pix" placeholder="Chave Pix"><br><br>
 
-  <button class="button" onclick="generatePix()">Gerar Pagamento</button>
+  <button onclick="generatePix()">Gerar Pagamento</button>
   <p id="pix-key" onclick="copyPixKey()"></p>
   <div id="qrcode"></div>
-  <button class="button" onclick="checkPayment()" id="check-button">Verificar Pagamento</button>
+  <button onclick="checkPayment()" id="check-button" style="display:none;">Verificar Pagamento</button>
   <p id="confirmation">Pagamento Confirmado! Você está no bolão 🎉</p>
-
-  <div id="bolao-info">
-    <p>Você está no bolão! Valor: R$10,00</p>
-    <div id="milhares">
-      <div class="milhar-col">Milhar 1: 1234</div>
-      <div class="milhar-col">Milhar 2: 5678</div>
-      <div class="milhar-col">Milhar 3: 9101</div>
-      <div class="milhar-col">Milhar 4: 1121</div>
-    </div>
-    <button class="button" onclick="talkToPromoter()">Falar com Promotor</button>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <script>
@@ -103,26 +87,12 @@
         if (data.status === "approved") {
           document.getElementById("confirmation").style.display = "block";
           document.getElementById("check-button").style.display = "none";
-          document.getElementById("bolao-info").style.display = "block";
         } else {
           alert("Pagamento ainda não foi reconhecido. Tente novamente.");
         }
       });
     }
-
-    function talkToPromoter() {
-      window.location.href = "https://wa.me/1234567890"; // Link do WhatsApp do promotor
-    }
   </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
