@@ -23,7 +23,6 @@
   <button onclick="generatePix()">Gerar Pagamento</button>
   <p id="pix-key" onclick="copyPixKey()"></p>
   <div id="qrcode"></div>
-  <button onclick="checkPayment()" id="check-button" style="display:none;">Verificar Pagamento</button>
   <p id="confirmation">Pagamento Confirmado! Você está no bolão 🎉</p>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
@@ -50,11 +49,13 @@
         const pixKey = data.pixKey;
         document.getElementById("pix-key").innerText = `Chave Pix: ${pixKey}`;
         document.getElementById("pix-key").style.display = "block";
-        document.getElementById("check-button").style.display = "block";
         paymentId = data.paymentId;
 
         // Gerar o QR Code
         generateQRCode(pixKey);
+
+        // Iniciar a verificação do pagamento
+        checkPayment();
       });
     }
 
@@ -87,7 +88,6 @@
         .then(data => {
           if (data.status === "approved") {
             document.getElementById("confirmation").style.display = "block";
-            document.getElementById("check-button").style.display = "none";
             clearInterval(interval);  // Para o intervalo após pagamento confirmado
           } else {
             console.log("Pagamento pendente...");
