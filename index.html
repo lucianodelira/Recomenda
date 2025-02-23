@@ -8,9 +8,8 @@
     body { font-family: Arial, sans-serif; text-align: center; }
     #pix-container { display: none; cursor: pointer; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 20px; }
     #confirmation { display: none; color: green; }
-    #qrcode { margin-top: 20px; }
     #timer { color: red; font-size: 20px; }
-    #hidden-content { display: block; }
+    #hidden-content { display: none; }
     input[type="text"] { padding: 10px; width: 80%; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
     #pix-key-input { width: 80%; padding: 10px; margin-top: 20px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; background-color: #f9f9f9; text-align: center; }
     button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -31,17 +30,24 @@
   <!-- Caixa de texto para exibir a chave Pix -->
   <div id="pix-container">
     <input type="text" id="pix-key-input" readonly>
-    <div id="qrcode"></div>
     <p id="timer"></p>
   </div>
 
   <p id="confirmation">Pagamento Confirmado! Você está no bolão 🎉</p>
 
+  <!-- Conteúdo oculto do bolão que será exibido após o pagamento -->
   <div id="hidden-content">
-    <p>Conteúdo do Bolão será ocultado após confirmação do pagamento.</p>
+    <h2>Bem-vindo ao Bolão!</h2>
+    <p>Aqui estão as informações e os palpites do seu bolão:</p>
+    <!-- Adicione o conteúdo do bolão aqui -->
+    <ul>
+      <li>Palpite 1: 1234</li>
+      <li>Palpite 2: 5678</li>
+      <li>Palpite 3: 9101</li>
+      <li>Palpite 4: 1121</li>
+    </ul>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <script>
     const googleScriptURL = "https://script.google.com/macros/s/AKfycby8lBZxdLYSJa3YFymGK6cf5oFZdgXU3Ip95e5aHE014mxghJudSWXd0bGFZanjY1yn/exec";
     let paymentId = null;
@@ -69,22 +75,11 @@
         document.getElementById("pix-container").style.display = "block";
         paymentId = data.paymentId;
 
-        // Gerar o QR Code
-        generateQRCode(pixKey);
-
         // Iniciar cronômetro de 90 segundos
         startTimer();
 
         // Iniciar a verificação do pagamento
         checkPayment();
-      });
-    }
-
-    function generateQRCode(pixKey) {
-      QRCode.toCanvas(document.getElementById("qrcode"), pixKey, function(error) {
-        if (error) {
-          console.error(error);
-        }
       });
     }
 
@@ -113,7 +108,9 @@
           if (data.status === "approved") {
             clearInterval(interval);
             document.getElementById("confirmation").style.display = "block";
-            document.getElementById("hidden-content").style.display = "none";  // Oculta o conteúdo após confirmação
+            document.getElementById("hidden-content").style.display = "block";  // Exibe o conteúdo do bolão após o pagamento
+            document.getElementById("pix-container").style.display = "none";  // Oculta a área do Pix
+            document.getElementById("timer").style.display = "none";  // Oculta o cronômetro
           } else {
             console.log("Pagamento pendente...");
           }
