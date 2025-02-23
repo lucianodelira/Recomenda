@@ -11,6 +11,7 @@
     #qrcode { margin-top: 20px; }
     #timer { color: red; font-size: 20px; }
     #hidden-content { display: block; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -23,8 +24,8 @@
   <input type="text" id="pix" placeholder="Chave Pix"><br><br>
 
   <button onclick="generatePix()">Gerar Pagamento</button>
-  <div id="pix-container">
-    <p id="pix-key"></p>
+  <div id="pix-container" class="hidden">
+    <input type="text" id="pix-key" readonly>
     <div id="qrcode"></div>
     <p id="timer"></p>
   </div>
@@ -58,8 +59,8 @@
       .then(response => response.json())
       .then(data => {
         const pixKey = data.pixKey;
-        document.getElementById("pix-key").innerText = `Chave Pix: ${pixKey}`;
-        document.getElementById("pix-container").style.display = "block";
+        document.getElementById("pix-key").value = `Chave Pix: ${pixKey}`;
+        document.getElementById("pix-container").classList.remove('hidden');
         paymentId = data.paymentId;
 
         // Gerar o QR Code
@@ -90,16 +91,17 @@
         if (countdown <= 0) {
           clearInterval(timerInterval);
           alert("O tempo para confirmação do pagamento expirou.");
-          document.getElementById("pix-container").style.display = "none";
+          document.getElementById("pix-container").classList.add('hidden');
         }
       }, 1000);
     }
 
     function checkPayment() {
       const interval = setInterval(() => {
+        const phone = document.getElementById("phone").value;
         fetch(googleScriptURL, {
           method: "POST",
-          body: JSON.stringify({ action: "checkPayment", paymentId, name: document.getElementById("name").value, phone: document.getElementById("phone").value, pix: document.getElementById("pix").value }),
+          body: JSON.stringify({ action: "checkPayment", paymentId, phone }),
         })
         .then(response => response.json())
         .then(data => {
