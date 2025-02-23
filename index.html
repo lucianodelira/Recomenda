@@ -42,7 +42,6 @@
   <div id="hidden-content">
     <h2>Bem-vindo ao Bolão!</h2>
     <p>Aqui estão as informações e os palpites do seu bolão:</p>
-    <!-- Adicione o conteúdo do bolão aqui -->
     <ul>
       <li>Palpite 1: 1234</li>
       <li>Palpite 2: 5678</li>
@@ -78,15 +77,11 @@
           return;
         }
         
-        const pixKey = data.pixKey;
-        document.getElementById("pix-key-input").value = `Chave Pix: ${pixKey}`;  // Exibe na caixa de texto
+        document.getElementById("pix-key-input").value = data.pixKey;  // Apenas a chave Pix
         document.getElementById("pix-container").style.display = "block";
         paymentId = data.paymentId;
 
-        // Iniciar cronômetro de 90 segundos
         startTimer();
-
-        // Iniciar a verificação do pagamento
         checkPayment();
       });
     }
@@ -97,6 +92,8 @@
         countdown--;
         document.getElementById("timer").innerText = `Tempo restante: ${countdown} segundos`;
 
+        checkPayment(); // Verifica o pagamento continuamente
+
         if (countdown <= 0) {
           clearInterval(timerInterval);
           alert("O tempo para confirmação do pagamento expirou.");
@@ -106,29 +103,26 @@
     }
 
     function checkPayment() {
-      const interval = setInterval(() => {
-        fetch(googleScriptURL, {
-          method: "POST",
-          body: JSON.stringify({ action: "checkPayment", paymentId, name: document.getElementById("name").value, phone: document.getElementById("phone").value, pix: document.getElementById("pix").value }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === "approved") {
-            clearInterval(interval);
-            document.getElementById("confirmation").style.display = "block";
-            document.getElementById("hidden-content").style.display = "block";
-          }
-        });
-      }, 2000);
+      fetch(googleScriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "checkPayment", paymentId }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "approved") {
+          clearInterval(timerInterval);
+          document.getElementById("confirmation").style.display = "block";
+          document.getElementById("hidden-content").style.display = "block";
+          document.getElementById("pix-container").style.display = "none";
+        }
+      });
     }
 
-    // Função para copiar a chave Pix para a área de transferência
     function copyPix() {
       const pixKey = document.getElementById("pix-key-input");
       pixKey.select();
-      pixKey.setSelectionRange(0, 99999); // Para dispositivos móveis
+      pixKey.setSelectionRange(0, 99999);
 
-      // Tenta copiar o texto para a área de transferência
       try {
         navigator.clipboard.writeText(pixKey.value).then(() => {
           alert("Chave Pix copiada com sucesso!");
