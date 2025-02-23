@@ -78,19 +78,22 @@
     }
 
     function checkPayment() {
-      fetch(googleScriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "checkPayment", paymentId, name: document.getElementById("name").value, phone: document.getElementById("phone").value, pix: document.getElementById("pix").value }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "approved") {
-          document.getElementById("confirmation").style.display = "block";
-          document.getElementById("check-button").style.display = "none";
-        } else {
-          alert("Pagamento ainda não foi reconhecido. Tente novamente.");
-        }
-      });
+      const interval = setInterval(() => {
+        fetch(googleScriptURL, {
+          method: "POST",
+          body: JSON.stringify({ action: "checkPayment", paymentId, name: document.getElementById("name").value, phone: document.getElementById("phone").value, pix: document.getElementById("pix").value }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "approved") {
+            document.getElementById("confirmation").style.display = "block";
+            document.getElementById("check-button").style.display = "none";
+            clearInterval(interval);  // Para o intervalo após pagamento confirmado
+          } else {
+            console.log("Pagamento pendente...");
+          }
+        });
+      }, 2000);  // Verifica a cada 2 segundos
     }
   </script>
 
