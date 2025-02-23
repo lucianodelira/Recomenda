@@ -7,8 +7,9 @@
   <style>
     body { font-family: Arial, sans-serif; text-align: center; }
     #pix-key { display: none; cursor: pointer; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    #confirmation { display: none; color: green; }
+    #confirmation { display: none; color: green; font-size: 20px; font-weight: bold; }
     #qrcode { margin-top: 20px; }
+    #countdown { color: red; font-size: 16px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -18,17 +19,21 @@
 
   <input type="text" id="name" placeholder="Nome"><br><br>
   <input type="text" id="phone" placeholder="Telefone"><br><br>
-  <input type="text" id="pix" placeholder="Chave Pix"><br><br>
+  <input type="text" id="pix" placeholder="Chave Pix" readonly><br><br>
 
   <button onclick="generatePix()">Gerar Pagamento</button>
-  <p id="pix-key" onclick="copyPixKey()"></p>
+
   <div id="qrcode"></div>
+  <p id="pix-key"></p>
   <p id="confirmation">Pagamento Confirmado! Você está no bolão 🎉</p>
+  <p id="countdown"></p>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <script>
     const googleScriptURL = "https://script.google.com/macros/s/AKfycby8lBZxdLYSJa3YFymGK6cf5oFZdgXU3Ip95e5aHE014mxghJudSWXd0bGFZanjY1yn/exec";
     let paymentId = null;
+    let countdownTimer = null;
+    let countdownValue = 90;  // 1 minuto e meio (90 segundos)
 
     function generatePix() {
       const name = document.getElementById("name").value;
@@ -47,12 +52,16 @@
       .then(response => response.json())
       .then(data => {
         const pixKey = data.pixKey;
-        document.getElementById("pix-key").innerText = `Chave Pix: ${pixKey}`;
-        document.getElementById("pix-key").style.display = "block";
         paymentId = data.paymentId;
+
+        // Exibe a chave Pix na caixa de texto
+        document.getElementById("pix").value = pixKey;
 
         // Gerar o QR Code
         generateQRCode(pixKey);
+
+        // Inicia o cronômetro
+        startCountdown();
 
         // Iniciar a verificação do pagamento
         checkPayment();
@@ -67,15 +76,22 @@
       });
     }
 
-    function copyPixKey() {
-      const pixKeyText = document.getElementById("pix-key").innerText;
-      const textArea = document.createElement("textarea");
-      textArea.value = pixKeyText.replace("Chave Pix: ", "");
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      alert("Chave Pix copiada para a área de transferência!");
+    function startCountdown() {
+      countdownTimer = setInterval(() => {
+        countdownValue--;
+        document.getElementById("countdown").innerText = `Tempo restante: ${countdownValue}s`;
+
+        if (countdownValue <= 0) {
+          clearInterval(countdownTimer);
+          document.getElementById("countdown").innerText = "Tempo expirado! O pagamento não pode ser confirmado.";
+          disablePaymentCheck();
+        }
+      }, 1000);
+    }
+
+    function disablePaymentCheck() {
+      // Desabilita o processo de verificação após o tempo expirar
+      document.getElementById("pix").disabled = true;
     }
 
     function checkPayment() {
@@ -88,6 +104,8 @@
         .then(data => {
           if (data.status === "approved") {
             document.getElementById("confirmation").style.display = "block";
+            document.body.innerHTML = '';  // Oculta tudo da página
+            document.getElementById("confirmation").style.display = "block";  // Exibe a confirmação do bolão
             clearInterval(interval);  // Para o intervalo após pagamento confirmado
           } else {
             console.log("Pagamento pendente...");
