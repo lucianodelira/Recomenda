@@ -3,94 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolão</title>
+  <title>Confirmando Participação</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    #pix-key { display: none; cursor: pointer; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    #confirmation { display: none; color: green; }
-    #qrcode { margin-top: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #fffae6;
+      padding: 50px;
+    }
+
+    h1 {
+      font-size: 40px;
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+
+    #confirmation {
+      font-size: 30px;
+      color: #333;
+      background-color: #f0f0f0;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+
+    #bolao-message {
+      font-size: 24px;
+      color: #000;
+      background-color: #ffd700;
+      padding: 30px;
+      border-radius: 10px;
+      display: none;
+      font-weight: bold;
+    }
+
+    #payment-info {
+      font-size: 20px;
+      color: #000;
+      margin-top: 30px;
+    }
+
+    .milhares-list {
+      font-size: 18px;
+      margin-top: 20px;
+      background-color: #e1e1e1;
+      padding: 20px;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Bolão - Participe Agora!</h1>
-  <p>Digite seus dados para gerar seu Pix de R$10,00.</p>
+  <h1>Confirmação de Pagamento</h1>
 
-  <input type="text" id="name" placeholder="Nome"><br><br>
-  <input type="text" id="phone" placeholder="Telefone"><br><br>
-  <input type="text" id="pix" placeholder="Chave Pix"><br><br>
+  <div id="confirmation">
+    Seu pagamento foi confirmado! 🎉
+  </div>
 
-  <button onclick="generatePix()">Gerar Pagamento</button>
-  <p id="pix-key" onclick="copyPixKey()"></p>
-  <div id="qrcode"></div>
-  <button onclick="checkPayment()" id="check-button" style="display:none;">Verificar Pagamento</button>
-  <p id="confirmation">Pagamento Confirmado! Você está no bolão 🎉</p>
+  <div id="bolao-message">
+    Agora você está participando do bolão! Boa sorte! 🍀
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <div id="payment-info">
+    <p>Detalhes do pagamento:</p>
+    <p id="name"></p>
+    <p id="phone"></p>
+    <p id="pix"></p>
+  </div>
+
+  <div class="milhares-list" id="milhares">
+    <h3>Milhares Removidas:</h3>
+    <!-- Aqui as milhar removidas serão listadas -->
+  </div>
+
   <script>
-    const googleScriptURL = "https://script.google.com/macros/s/AKfycby8lBZxdLYSJa3YFymGK6cf5oFZdgXU3Ip95e5aHE014mxghJudSWXd0bGFZanjY1yn/exec";
-    let paymentId = null;
+    // Simula o recebimento de dados após confirmação de pagamento
+    window.onload = function() {
+      // Exemplo de dados, substitua conforme necessário
+      let userData = {
+        name: "João Silva",
+        phone: "(11) 99999-9999",
+        pix: "joaosilva@pix.com"
+      };
 
-    function generatePix() {
-      const name = document.getElementById("name").value;
-      const phone = document.getElementById("phone").value;
-      const pix = document.getElementById("pix").value;
+      // Exibe o nome, telefone, e chave Pix do participante
+      document.getElementById("name").textContent = `Nome: ${userData.name}`;
+      document.getElementById("phone").textContent = `Telefone: ${userData.phone}`;
+      document.getElementById("pix").textContent = `Chave Pix: ${userData.pix}`;
 
-      if (!name || !phone || !pix) {
-        alert("Preencha todos os campos!");
-        return;
-      }
+      // Esconde o formulário e exibe a mensagem de sucesso
+      document.getElementById("confirmation").style.display = "none";
+      document.getElementById("bolao-message").style.display = "block";
 
-      fetch(googleScriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "generatePix", name, phone, pix }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        const pixKey = data.pixKey;
-        document.getElementById("pix-key").innerText = `Chave Pix: ${pixKey}`;
-        document.getElementById("pix-key").style.display = "block";
-        document.getElementById("check-button").style.display = "block";
-        paymentId = data.paymentId;
+      // Simula a listagem das milhares removidas
+      removeMilhares();
+    };
 
-        // Gerar o QR Code
-        generateQRCode(pixKey);
-      });
-    }
-
-    function generateQRCode(pixKey) {
-      QRCode.toCanvas(document.getElementById("qrcode"), pixKey, function(error) {
-        if (error) {
-          console.error(error);
-        }
-      });
-    }
-
-    function copyPixKey() {
-      const pixKeyText = document.getElementById("pix-key").innerText;
-      const textArea = document.createElement("textarea");
-      textArea.value = pixKeyText.replace("Chave Pix: ", "");
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      alert("Chave Pix copiada para a área de transferência!");
-    }
-
-    function checkPayment() {
-      fetch(googleScriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "checkPayment", paymentId, name: document.getElementById("name").value, phone: document.getElementById("phone").value, pix: document.getElementById("pix").value }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "approved") {
-          document.getElementById("confirmation").style.display = "block";
-          document.getElementById("check-button").style.display = "none";
-        } else {
-          alert("Pagamento ainda não foi reconhecido. Tente novamente.");
-        }
-      });
+    function removeMilhares() {
+      // Aqui você pode adicionar código para listar as milhares removidas da planilha
+      let milhares = ["00001", "00002", "00003", "00004", "00005", "00006", "00007", "00008", "00009", "00010"]; // Simulação
+      const milharesContainer = document.getElementById("milhares");
+      milharesContainer.innerHTML += milhares.map(num => `<p>${num}</p>`).join('');
     }
   </script>
 
