@@ -14,6 +14,8 @@
     #pix-key-input { width: 80%; padding: 10px; margin-top: 20px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; background-color: #f9f9f9; text-align: center; }
     button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button:hover { background-color: #45a049; }
+    #copy-button { background-color: #2196F3; }
+    #copy-button:hover { background-color: #0b7dda; }
   </style>
 </head>
 <body>
@@ -30,6 +32,7 @@
   <!-- Caixa de texto para exibir a chave Pix -->
   <div id="pix-container">
     <input type="text" id="pix-key-input" readonly>
+    <button id="copy-button" onclick="copyPix()">Copiar Chave</button>
     <p id="timer"></p>
   </div>
 
@@ -117,6 +120,22 @@
           }
         });
       }, 2000);
+    }
+
+    // Função para copiar a chave Pix para a área de transferência
+    function copyPix() {
+      const pixKey = document.getElementById("pix-key-input");
+      pixKey.select();
+      pixKey.setSelectionRange(0, 99999); // Para dispositivos móveis
+
+      // Tenta copiar o texto para a área de transferência
+      try {
+        navigator.clipboard.writeText(pixKey.value).then(() => {
+          alert("Chave Pix copiada com sucesso!");
+        });
+      } catch (err) {
+        alert("Erro ao copiar a chave Pix.");
+      }
     }
   </script>
 </body>
