@@ -80,7 +80,7 @@
     function checkPayment() {
       fetch(googleScriptURL, {
         method: "POST",
-        body: JSON.stringify({ action: "checkPayment", paymentId }),
+        body: JSON.stringify({ action: "checkPayment", paymentId, name: document.getElementById("name").value, phone: document.getElementById("phone").value, pix: document.getElementById("pix").value }),
       })
       .then(response => response.json())
       .then(data => {
