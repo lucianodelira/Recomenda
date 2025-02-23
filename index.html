@@ -5,93 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bolão</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f9f9f9;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      color: #2f8f7e;
-      margin-top: 20px;
-    }
-    p {
-      color: #333;
-      font-size: 18px;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #2f8f7e;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #248d6f;
-    }
-    #pix-container {
-      display: none;
-      margin-top: 20px;
-      background-color: #e6f7f0;
-      padding: 15px;
-      border-radius: 10px;
-      border: 1px solid #c1e6d7;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    #pix-key {
-      font-size: 18px;
-      font-weight: bold;
-      color: #2f8f7e;
-    }
-    #qrcode {
-      margin-top: 20px;
-    }
-    #timer {
-      color: red;
-      font-size: 20px;
-    }
-    #hidden-content {
-      display: block;
-    }
-    #confirmation {
-      display: none;
-      color: green;
-      font-size: 20px;
-      font-weight: bold;
-    }
-    .text-box {
-      width: 100%;
-      max-width: 300px;
-      padding: 10px;
-      margin: 10px auto;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      text-align: center;
-      font-size: 18px;
-      color: #333;
-    }
-    .copy-button {
-      padding: 10px;
-      background-color: #248d6f;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .copy-button:hover {
-      background-color: #1c7559;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; }
+    #pix-container { display: none; cursor: pointer; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 20px; }
+    #confirmation { display: none; color: green; }
+    #qrcode { margin-top: 20px; }
+    #timer { color: red; font-size: 20px; }
+    #hidden-content { display: block; }
+    input[type="text"] { padding: 10px; width: 80%; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+    #pix-key-input { width: 80%; padding: 10px; margin-top: 20px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; background-color: #f9f9f9; text-align: center; }
+    button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background-color: #45a049; }
   </style>
 </head>
 <body>
@@ -99,16 +22,15 @@
   <h1>Bolão - Participe Agora!</h1>
   <p>Digite seus dados para gerar seu Pix de R$10,00.</p>
 
-  <input type="text" id="name" placeholder="Nome"><br>
-  <input type="text" id="phone" placeholder="Telefone"><br>
-  <input type="text" id="pix" placeholder="Chave Pix"><br>
+  <input type="text" id="name" placeholder="Nome"><br><br>
+  <input type="text" id="phone" placeholder="Telefone"><br><br>
+  <input type="text" id="pix" placeholder="Chave Pix"><br><br>
 
   <button onclick="generatePix()">Gerar Pagamento</button>
 
+  <!-- Caixa de texto para exibir a chave Pix -->
   <div id="pix-container">
-    <p id="pix-key"></p>
-    <input type="text" class="text-box" id="generated-pix" readonly>
-    <button class="copy-button" onclick="copyPix()">Copiar Chave Pix</button>
+    <input type="text" id="pix-key-input" readonly>
     <div id="qrcode"></div>
     <p id="timer"></p>
   </div>
@@ -143,8 +65,7 @@
       .then(response => response.json())
       .then(data => {
         const pixKey = data.pixKey;
-        document.getElementById("pix-key").innerText = `Chave Pix: ${pixKey}`;
-        document.getElementById("generated-pix").value = pixKey;
+        document.getElementById("pix-key-input").value = `Chave Pix: ${pixKey}`;  // Exibe na caixa de texto
         document.getElementById("pix-container").style.display = "block";
         paymentId = data.paymentId;
 
@@ -198,17 +119,6 @@
           }
         });
       }, 2000);  // Verifica a cada 2 segundos
-    }
-
-    function copyPix() {
-      const pixInput = document.getElementById("generated-pix");
-      pixInput.select();
-      pixInput.setSelectionRange(0, 99999); // Para dispositivos móveis
-
-      // Copiar para a área de transferência
-      document.execCommand("copy");
-
-      alert("Chave Pix copiada!");
     }
   </script>
 
