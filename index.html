@@ -6,10 +6,8 @@
   <title>Bolão</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; }
-    #pix-container { display: none; cursor: pointer; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 20px; }
-    #confirmation { display: none; color: green; }
+    #pix-container, #confirmation, #hidden-content { display: none; }
     #timer { color: red; font-size: 20px; }
-    #hidden-content { display: none; }
     input[type="text"] { padding: 10px; width: 80%; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
     #pix-key-input { width: 80%; padding: 10px; margin-top: 20px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; background-color: #f9f9f9; text-align: center; }
     button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -38,23 +36,18 @@
 
   <p id="confirmation">Pagamento Confirmado! Você está no bolão 🎉</p>
 
-  <!-- Conteúdo oculto do bolão que será exibido após o pagamento -->
+  <!-- Conteúdo do bolão, será preenchido com os palpites -->
   <div id="hidden-content">
-    <h2>Bem-vindo ao Bolão!</h2>
-    <p>Aqui estão as informações e os palpites do seu bolão:</p>
-    <ul>
-      <li>Palpite 1: 1234</li>
-      <li>Palpite 2: 5678</li>
-      <li>Palpite 3: 9101</li>
-      <li>Palpite 4: 1121</li>
-    </ul>
+    <h2>Bolão Liberado!</h2>
+    <ul id="palpites-list"></ul>
+    <button onclick="window.location.href='https://www.acertosclub.com'">Promotor</button>
   </div>
 
   <script>
     const googleScriptURL = "https://script.google.com/macros/s/AKfycbxKnNCxut88AhIMzH_eA-Q3-Pfiy0qPkmFRrKbA65oYooBBXvOQU3rghrN6to0W-wlQ3Q/exec";
     let paymentId = null;
-    let timerInterval = null;
     let countdown = 90;
+    let checkPaymentInterval = null;
 
     function generatePix() {
       const name = document.getElementById("name").value;
@@ -76,26 +69,25 @@
           alert("Erro ao gerar Pix: " + data.error);
           return;
         }
-        
-        document.getElementById("pix-key-input").value = data.pixKey;  // Apenas a chave Pix
+
+        document.getElementById("pix-key-input").value = data.pixKey; // Exibir somente a chave Pix
         document.getElementById("pix-container").style.display = "block";
         paymentId = data.paymentId;
 
         startTimer();
-        checkPayment();
+        checkPaymentInterval = setInterval(checkPayment, 10000); // Verificar pagamento a cada 10 segundos
       });
     }
 
     function startTimer() {
       document.getElementById("timer").innerText = `Tempo restante: ${countdown} segundos`;
-      timerInterval = setInterval(() => {
+      const timerInterval = setInterval(() => {
         countdown--;
         document.getElementById("timer").innerText = `Tempo restante: ${countdown} segundos`;
 
-        checkPayment(); // Verifica o pagamento continuamente
-
         if (countdown <= 0) {
           clearInterval(timerInterval);
+          clearInterval(checkPaymentInterval);
           alert("O tempo para confirmação do pagamento expirou.");
           document.getElementById("pix-container").style.display = "none";
         }
@@ -110,26 +102,43 @@
       .then(response => response.json())
       .then(data => {
         if (data.status === "approved") {
-          clearInterval(timerInterval);
-          document.getElementById("confirmation").style.display = "block";
+          clearInterval(checkPaymentInterval);
+          confirmPayment();
+        }
+      });
+    }
+
+    function confirmPayment() {
+      document.getElementById("pix-container").style.display = "none";
+      document.getElementById("confirmation").style.display = "none";
+
+      fetch(googleScriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getPalpites" })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.palpites) {
+          const palpitesList = document.getElementById("palpites-list");
+          palpitesList.innerHTML = "";
+          data.palpites.forEach(palpite => {
+            const li = document.createElement("li");
+            li.textContent = palpite;
+            palpitesList.appendChild(li);
+          });
+
           document.getElementById("hidden-content").style.display = "block";
-          document.getElementById("pix-container").style.display = "none";
         }
       });
     }
 
     function copyPix() {
       const pixKey = document.getElementById("pix-key-input");
-      pixKey.select();
-      pixKey.setSelectionRange(0, 99999);
-
-      try {
-        navigator.clipboard.writeText(pixKey.value).then(() => {
-          alert("Chave Pix copiada com sucesso!");
-        });
-      } catch (err) {
+      navigator.clipboard.writeText(pixKey.value).then(() => {
+        alert("Chave Pix copiada com sucesso!");
+      }).catch(() => {
         alert("Erro ao copiar a chave Pix.");
-      }
+      });
     }
   </script>
 </body>
